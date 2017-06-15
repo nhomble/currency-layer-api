@@ -3,6 +3,7 @@ package org.hombro.currencylayer.api.response.json
 import org.hombro.currencylayer.api.response.error.CurrencyLayerError
 import org.joda.time.DateTime
 
+import scala.util.{Failure, Success}
 import scala.util.parsing.json.JSON
 
 object Response {
@@ -13,6 +14,7 @@ object Response {
         val isSuccess = map.get("success").get.asInstanceOf[Boolean]
         Response(isSuccess, map)
       case None => throw new RuntimeException("failed to parsed the json")
+      case _ => throw new RuntimeException("unrecognized map structure")
     }
   }
 
@@ -30,35 +32,35 @@ class Response(isSuccess: Boolean, payload: Map[String, Any]) {
 
   def currencyList() = {
     if (!isSuccess)
-      Left(parseException())
+      Failure(parseException())
     else {
       val parsed = payload.get("currencies").get.asInstanceOf[Map[String, String]]
       val currencies = parsed.keys.map(s => Currency(s, parsed.get(s).get)).toList
-      Right(CurrencyList(currencies))
+      Success(CurrencyList(currencies))
     }
   }
 
   def quoteQuery() = {
     if (!isSuccess)
-      Left(parseException())
+      Failure(parseException())
     else {
       val timestamp = payload.get("timestamp").get.asInstanceOf[Double]
       val source = payload.get("source").get.asInstanceOf[String]
       val quotesMap = payload.get("quotes").get.asInstanceOf[Map[String, Double]]
       val quotes = quotesMap.keys.map(s => Quote(s, quotesMap.get(s).get)).toList
-      Right(InstantQuoteQuery(timestamp, source, quotes))
+      Success(InstantQuoteQuery(timestamp, source, quotes))
     }
   }
 
   def historicQuoteQuery() = {
     if (!isSuccess)
-      Left(parseException())
+      Failure(parseException())
     else {
       quoteQuery() match {
-        case Left(exception) => Left(exception)
-        case Right(query) =>
+        case Failure(e) => Failure(e)
+        case Success(query) =>
           val date = DateTime.parse(payload.get("date").get.asInstanceOf[String]).toDate
-          Right(HistoricQuoteQuery(date, query.timestamp, query.source, query.quotes))
+          Success(HistoricQuoteQuery(date, query.timestamp, query.source, query.quotes))
       }
     }
   }
