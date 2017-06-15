@@ -3,6 +3,7 @@ package org.hombro.currencylayer
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import org.hombro.currencylayer.api.client.SynchronousClient
 import org.hombro.currencylayer.api.response.json.{CurrencyList, HistoricQuoteQuery, InstantQuoteQuery}
 
 import scala.util.Try
@@ -17,7 +18,10 @@ object CurrencyLayerClient {
   val ENDPOINT_CHANGE = BASE_URL + "/change"
   val ENDPOINT_LIST = BASE_URL + "/list"
 
-  private val DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd")
+  val DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd")
+
+  def client(apiKey: String) = new SynchronousClient(apiKey)
+  def authenticatedClient(apiKey: String) = new SynchronousClient(apiKey, protocol = "https://")
 }
 
 /**
