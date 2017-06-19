@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import org.hombro.currencylayer.api.client.SynchronousClient
-import org.hombro.currencylayer.api.response.json.{CurrencyList, HistoricQuoteQuery, LiveQuoteQuery}
+import org.hombro.currencylayer.api.response.json.model.{CurrencyList, HistoricQuoteQuery, LiveQuoteQuery}
 
 import scala.util.Try
 

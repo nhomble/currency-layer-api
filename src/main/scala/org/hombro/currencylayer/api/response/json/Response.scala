@@ -1,6 +1,7 @@
 package org.hombro.currencylayer.api.response.json
 
 import org.hombro.currencylayer.api.response.error.CurrencyLayerError
+import org.hombro.currencylayer.api.response.json.model._
 import org.joda.time.DateTime
 
 import scala.util.parsing.json.JSON

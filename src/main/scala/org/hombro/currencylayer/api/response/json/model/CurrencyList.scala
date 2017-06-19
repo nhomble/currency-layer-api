@@ -1,4 +1,4 @@
-package org.hombro.currencylayer.api.response.json
+package org.hombro.currencylayer.api.response.json.model
 
 object CurrencyList {
   def apply(currencies: List[Currency]) = new CurrencyList(currencies)

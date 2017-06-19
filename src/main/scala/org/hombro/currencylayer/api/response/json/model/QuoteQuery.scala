@@ -1,4 +1,4 @@
-package org.hombro.currencylayer.api.response.json
+package org.hombro.currencylayer.api.response.json.model
 
 import java.util.Date
 
