@@ -149,6 +149,7 @@ class ResponseTest extends FunSuite {
         assert(o.query.from == "USD")
         assert(o.query.to == "GBP")
         assert(o.query.amount == 10)
+      case Failure(o) => fail()
     }
   }
 
@@ -183,6 +184,7 @@ class ResponseTest extends FunSuite {
         assert(o.query.to == "GBP")
         assert(o.query.amount == 10)
         assert(o.date == CurrencyLayerClient.DATE_FORMATTER.parse("2005-01-01"))
+      case Failure(o) => fail()
     }
   }
 }
