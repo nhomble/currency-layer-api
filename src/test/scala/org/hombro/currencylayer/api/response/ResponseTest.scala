@@ -66,7 +66,7 @@ class ResponseTest extends FunSuite {
         assert(o.currencies.length == 1)
         assert(o.currencies.head.enumeration == "AED")
         assert(o.currencies.head.description == "United Arab Emirates Dirham")
-      case Failure(_) => fail()
+      case Failure(o) => fail()
     }
   }
 
@@ -90,7 +90,7 @@ class ResponseTest extends FunSuite {
         assert(o.source == "USD")
         assert(o.quotes.head.currency == "USDAED")
         assert(o.quotes.head.rate == 3.672982)
-      case Failure(_) => fail()
+      case Failure(o) => fail()
     }
   }
 
