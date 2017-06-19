@@ -1,7 +1,7 @@
 # currency-layer-api
 scala client for https://currencylayer.com/
 
-
+[![Build Status](https://travis-ci.org/nhomble/currency-layer-api.svg?branch=master)](https://travis-ci.org/nhomble/currency-layer-api)
 ```scala
 package org.hombro.currencylayer
 
