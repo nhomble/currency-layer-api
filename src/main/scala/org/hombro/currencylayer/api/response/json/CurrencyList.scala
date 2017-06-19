@@ -7,6 +7,6 @@ object CurrencyList {
 /**
   * Created by nicolas on 6/11/2017.
   */
-class CurrencyList(val currencies: List[Currency]) {
+class CurrencyList(val currencies: List[Currency])
 
-}
+class Currency(val enumeration: String, val description: String)

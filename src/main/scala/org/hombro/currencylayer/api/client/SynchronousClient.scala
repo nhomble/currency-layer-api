@@ -27,8 +27,8 @@ case class SynchronousClient(override val apiKey: String, val protocol: String =
   /**
     * "live" endpoint - request the most recent exchange rate data
     *
-    * @param currencies
-    * @param prettyJson
+    * @param currencies list of currencies you are interested in
+    * @param prettyJson make the json human readable
     * @return
     */
   override def liveRate(currencies: List[String], prettyJson: Boolean) = {
@@ -45,14 +45,26 @@ case class SynchronousClient(override val apiKey: String, val protocol: String =
     * identical to liveConversion(), the optional historical date parameter was pulled out and given a separate method
     * for the sake of clarity
     *
-    * @param fromCurrency
-    * @param toCurrency
-    * @param amount
-    * @param date
-    * @param prettyJson
+    * @param fromCurrency starting currency
+    * @param toCurrency   ending currency
+    * @param amount       amount
+    * @param date         date in the past
+    * @param prettyJson   make the json human readable
     * @return
     */
-  override def historialConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean) = ???
+  override def historialConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean) = {
+    val request = Http(protocol + CurrencyLayerClient.ENDPOINT_CONVERT)
+      .param("access_key", apiKey)
+      .param("from", fromCurrency)
+      .param("to", toCurrency)
+      .param("amount", amount.toString)
+      .param("date", CurrencyLayerClient.DATE_FORMATTER.format(date))
+    if (!prettyJson) {
+      request.param("format", "0")
+    }
+    val json = request.asString.body
+    Response.parse(json).historicConvert()
+  }
 
   /**
     * "historical" endpoint - request historical rates for a specific day
@@ -69,7 +81,7 @@ case class SynchronousClient(override val apiKey: String, val protocol: String =
     if (!prettyJson) {
       request.param("format", "0")
     }
-    if(currencies.nonEmpty){
+    if (currencies.nonEmpty) {
       request.param("currencies", currencies.mkString(","))
     }
     val json = request.asString.body
@@ -86,7 +98,18 @@ case class SynchronousClient(override val apiKey: String, val protocol: String =
     * @param prettyJson
     * @return
     */
-  override def liveConversion(fromCurrency: String, toCurrency: String, amount: Int, prettyJson: Boolean) = ???
+  override def liveConversion(fromCurrency: String, toCurrency: String, amount: Int, prettyJson: Boolean) = {
+    val request = Http(protocol + CurrencyLayerClient.ENDPOINT_CONVERT)
+      .param("access_key", apiKey)
+      .param("from", fromCurrency)
+      .param("to", toCurrency)
+      .param("amount", amount.toString)
+    if (!prettyJson) {
+      request.param("format", "0")
+    }
+    val json = request.asString.body
+    Response.parse(json).convert()
+  }
 
   /**
     * "change" endpoint - request any currency's change parameters (margin

@@ -22,13 +22,29 @@ class ResponseTest extends FunSuite {
   }
 
   test("parse exception") {
-    val out = Response.parse("{\"success\":false,\"error\":{\"code\":-1}}").parseException()
+    val out = Response.parse(
+      """
+        |{
+        | "success": false,
+        | "error": {
+        |   "code": -1
+        | }
+        |}
+      """.stripMargin).parseException()
     assert(out.code == -1)
     assert(out.message == "Unknown error code thrown")
   }
 
   test("parse exception from api call") {
-    val out = Response.parse("{\"success\":false,\"error\":{\"code\":-1}}").currencyList()
+    val out = Response.parse(
+      """
+        |{
+        | "success": false,
+        | "error": {
+        |   "code": -1
+        | }
+        |}
+      """.stripMargin).currencyList()
     out match {
       case Success(_) => fail()
       case Failure(f) => succeed
@@ -36,13 +52,14 @@ class ResponseTest extends FunSuite {
   }
 
   test("currencyList") {
-    val json = "{" +
-      "\"success\":true," +
-      "\"terms\":\"https:\\/\\/currencylayer.com\\/terms\"," +
-      "\"privacy\":\"https:\\/\\/currencylayer.com\\/privacy\"," +
-      "\"currencies\":{" +
-      " \"AED\":\"United Arab Emirates Dirham\"" +
-      "}}"
+    val json =
+      """
+        |{
+        | "success": true,
+        |  "currencies": {
+        |    "AED": "United Arab Emirates Dirham"
+        |    }
+        |} """.stripMargin
     val out = Response.parse(json).currencyList()
     out match {
       case Success(o) =>
@@ -54,44 +71,118 @@ class ResponseTest extends FunSuite {
   }
 
   test("quoteQuery") {
-    val json = "{" +
-      "\"success\":true," +
-      "\"terms\":\"https:\\/\\/currencylayer.com\\/terms\"," +
-      "\"privacy\":\"https:\\/\\/currencylayer.com\\/privacy\"," +
-      "\"timestamp\":1497744547," +
-      "\"source\":\"USD\"," +
-      "\"quotes\":{" +
-      " \"USDEUR\":0.5" +
-      "}}"
+    val json =
+      """
+        |{
+        | "success": true,
+        |  "terms": "https://currencylayer.com/terms",
+        |  "privacy": "https://currencylayer.com/privacy",
+        |    "timestamp": 1430401802,
+        |    "source": "USD",
+        |    "quotes": {
+        |        "USDAED": 3.672982
+        |    }
+        |}
+      """.stripMargin
     val out = Response.parse(json).quoteQuery()
     out match {
       case Success(o) =>
         assert(o.source == "USD")
-        assert(o.quotes.head.currency == "USDEUR")
-        assert(o.quotes.head.rate == .5)
+        assert(o.quotes.head.currency == "USDAED")
+        assert(o.quotes.head.rate == 3.672982)
       case Failure(_) => fail()
     }
   }
 
   test("historicQuoteQuery") {
-    val json = "{" +
-      "\"success\":true," +
-      "\"terms\":\"https:\\/\\/currencylayer.com\\/terms\"," +
-      "\"privacy\":\"https:\\/\\/currencylayer.com\\/privacy\"," +
-      "\"historical\":true," +
-      "\"date\":\"2010-06-18\"," +
-      "\"timestamp\":1276905599,\"" +
-      "source\":\"USD\"," +
-      "\"quotes\":{" +
-      " \"USDUSD\":1" +
-      "}}"
+    val json =
+      """
+        |{
+        |  "success": true,
+        |  "terms": "https://currencylayer.com/terms",
+        |  "privacy": "https://currencylayer.com/privacy",
+        |  "historical": true,
+        |  "date": "2005-02-01",
+        |  "timestamp": 1107302399,
+        |  "source": "USD",
+        |  "quotes": {
+        |    "USDAED": 3.67266
+        |  }
+        |}
+      """.stripMargin
     val out = Response.parse(json).historicQuoteQuery()
     out match {
       case Success(o) =>
-        assert(o.date == CurrencyLayerClient.DATE_FORMATTER.parse("2010-06-18"))
+        assert(o.date == CurrencyLayerClient.DATE_FORMATTER.parse("2005-02-01"))
         assert(o.source == "USD")
-        assert(o.quotes.head.currency == "USDUSD")
-        assert(o.quotes.head.rate == 1)
+        assert(o.quotes.head.currency == "USDAED")
+        assert(o.quotes.head.rate == 3.67266)
+      case Failure(o) => fail()
+    }
+  }
+
+  test("convert") {
+    val json =
+      """
+        |{
+        |  "success": true,
+        |  "terms": "https://currencylayer.com/terms",
+        |  "privacy": "https://currencylayer.com/privacy",
+        |  "query": {
+        |    "from": "USD",
+        |    "to": "GBP",
+        |    "amount": 10
+        |  },
+        |  "info": {
+        |    "timestamp": 1430068515,
+        |    "quote": 0.658443
+        |  },
+        |  "result": 6.58443
+        |}
+      """.stripMargin
+    val out = Response.parse(json).convert()
+    out match {
+      case Success(o) =>
+        assert(o.result == 6.58443)
+        assert(o.info.timestamp == 1430068515)
+        assert(o.info.quote == 0.658443)
+        assert(o.query.from == "USD")
+        assert(o.query.to == "GBP")
+        assert(o.query.amount == 10)
+    }
+  }
+
+  test("historic conversion") {
+    val json =
+      """
+        |{
+        |  "success": true,
+        |  "terms": "https://currencylayer.com/terms",
+        |  "privacy": "https://currencylayer.com/privacy",
+        |  "query": {
+        |    "from": "USD",
+        |    "to": "GBP",
+        |    "amount": 10
+        |  },
+        |  "info": {
+        |    "timestamp": 1104623999,
+        |    "quote": 0.51961
+        |  },
+        |  "historical": true,
+        |  "date": "2005-01-01",
+        |  "result": 5.1961
+        |}
+      """.stripMargin
+    val out = Response.parse(json).historicConvert()
+    out match {
+      case Success(o) =>
+        assert(o.result == 5.1961)
+        assert(o.info.timestamp == 1104623999)
+        assert(o.info.quote == 0.51961)
+        assert(o.query.from == "USD")
+        assert(o.query.to == "GBP")
+        assert(o.query.amount == 10)
+        assert(o.date == CurrencyLayerClient.DATE_FORMATTER.parse("2005-01-01"))
     }
   }
 }

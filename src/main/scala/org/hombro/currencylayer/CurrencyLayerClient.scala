@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import org.hombro.currencylayer.api.client.SynchronousClient
-import org.hombro.currencylayer.api.response.json.{CurrencyList, HistoricQuoteQuery, InstantQuoteQuery}
+import org.hombro.currencylayer.api.response.json.{CurrencyList, HistoricQuoteQuery, LiveQuoteQuery}
 
 import scala.util.Try
 
@@ -36,7 +36,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def liveRate(currencies: List[String] = List(), prettyJson: Boolean = true): Try[InstantQuoteQuery]
+  def liveRate(currencies: List[String] = List(), prettyJson: Boolean = true): Try[LiveQuoteQuery]
 
   /**
     * "historical" endpoint - request historical rates for a specific day
