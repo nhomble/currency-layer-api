@@ -71,7 +71,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def historialConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean = true)
+  def historicalConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean = true)
 
   /**
     * "timeframe" endpoint - request exchange rates for a specific period of time

@@ -29,7 +29,7 @@ case class SynchronousClient(override val apiKey: String, val protocol: String =
     Response.parse(json).quoteQuery()
   }
 
-  override def historialConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean) = {
+  override def historicalConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean) = {
     val request = Http(protocol + CurrencyLayerClient.ENDPOINT_CONVERT)
       .param("access_key", apiKey)
       .param("from", fromCurrency)
