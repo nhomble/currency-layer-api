@@ -187,4 +187,90 @@ class ResponseTest extends FunSuite {
       case Failure(o) => fail()
     }
   }
+
+  test("rates over interval") {
+    val json =
+      """
+        |{
+        |  "success": true,
+        |  "terms": "https://currencylayer.com/terms",
+        |  "privacy": "https://currencylayer.com/privacy",
+        |  "timeframe": true,
+        |  "start_date": "2010-03-01",
+        |  "end_date": "2010-04-01",
+        |  "source": "USD",
+        |  "quotes": {
+        |    "2010-03-01": {
+        |      "USDUSD": 1,
+        |      "USDGBP": 0.668525,
+        |      "USDEUR": 0.738541
+        |    },
+        |    "2010-03-02": {
+        |      "USDUSD": 1,
+        |      "USDGBP": 0.668827,
+        |      "USDEUR": 0.736145
+        |    }
+        |  }
+        |}
+      """.stripMargin
+    val out = Response.parse(json).ratesOverInterval()
+    out match {
+      case Failure(_) => fail()
+      case Success(o) =>
+        assert(o.rates.size == 2)
+        val rates = o.rates.get(CurrencyLayerClient.DATE_FORMATTER.parse("2010-03-02")).get
+        assert(rates.size == 3)
+    }
+  }
+
+  test("change in currency") {
+    val json =
+      """
+        |{
+        |  "success": true,
+        |  "terms": "https://currencylayer.com/terms",
+        |  "privacy": "https://currencylayer.com/privacy",
+        |  "change": true,
+        |  "start_date": "2005-01-01",
+        |  "end_date": "2010-01-01",
+        |  "source": "USD",
+        |  "quotes": {
+        |    "USDAUD": {
+        |      "start_rate": 1.281236,
+        |      "end_rate": 1.108609,
+        |      "change": -0.1726,
+        |      "change_pct": -13.4735
+        |    },
+        |    "USDEUR": {
+        |      "start_rate": 0.73618,
+        |      "end_rate": 0.697253,
+        |      "change": -0.0389,
+        |      "change_pct": -5.2877
+        |    },
+        |    "USDMXN":{
+        |      "start_rate": 11.149362,
+        |      "end_rate": 13.108757,
+        |      "change": 1.9594,
+        |      "change_pct": 17.5741
+        |    }
+        |  }
+        |}
+      """.stripMargin
+    val out = Response.parse(json).currencyChangeOverInterval()
+    out match {
+      case Failure(_) => fail()
+      case Success(o) =>
+        assert(o.size == 3)
+        assert(o.exists(cc => {
+          cc.startDate == CurrencyLayerClient.DATE_FORMATTER.parse("2005-01-01") &&
+            cc.endDate == CurrencyLayerClient.DATE_FORMATTER.parse("2010-01-01") &&
+            cc.source == "USD" &&
+            cc.pair == "USDAUD" &&
+            cc.startRate == 1.281236 &&
+            cc.endRate == 1.108609 &&
+            cc.change == -0.1726 &&
+            cc.changePercentage == -13.4735
+        }))
+    }
+  }
 }

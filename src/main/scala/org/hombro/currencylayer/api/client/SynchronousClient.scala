@@ -12,6 +12,7 @@ import scalaj.http.Http
   * Created by nicolas on 6/11/2017.
   */
 case class SynchronousClient(override val apiKey: String, val protocol: String = "http://") extends CurrencyLayerClient(apiKey) {
+  // TODO code duplication
   override def supportedCurrencies() = {
     val request = Http(protocol + CurrencyLayerClient.ENDPOINT_LIST)
       .param("access_key", apiKey)
@@ -70,9 +71,45 @@ case class SynchronousClient(override val apiKey: String, val protocol: String =
     Response.parse(json).convert()
   }
 
-  override def change(source: String, currencies: List[String], prettyJson: Boolean) = ???
+  override def change(source: String, currencies: List[String], prettyJson: Boolean) = {
+    val request = Http(protocol + CurrencyLayerClient.ENDPOINT_CHANGE)
+      .param("access_key", apiKey)
+      .param("currencies", currencies.mkString(","))
+      .param("source", source)
+    if (!prettyJson) {
+      request.param("format", "0")
+    }
+    val json = request.asString.body
+    Response.parse(json).currencyChangeOverInterval()
+  }
 
-  override def changeOverInterval(source: String, currencies: List[String], startDate: Date, endDate: Date, prettyJson: Boolean) = ???
+  override def changeOverInterval(source: String, currencies: List[String], startDate: Date, endDate: Date, prettyJson: Boolean) = {
+    val request = Http(protocol + CurrencyLayerClient.ENDPOINT_CHANGE)
+      .param("access_key", apiKey)
+      .param("currencies", currencies.mkString(","))
+      .param("source", source)
+      .param("start_date", CurrencyLayerClient.DATE_FORMATTER.format(startDate))
+      .param("end_date", CurrencyLayerClient.DATE_FORMATTER.format(endDate))
+    if (!prettyJson) {
+      request.param("format", "0")
+    }
+    val json = request.asString.body
+    Response.parse(json).currencyChangeOverInterval()
+  }
 
-  override def ratesOverInterval(startDate: Date, endDate: Date, source: String, currencies: List[String], prettyJson: Boolean) = ???
+  override def ratesOverInterval(startDate: Date, endDate: Date, source: String, currencies: List[String], prettyJson: Boolean) = {
+    val request = Http(protocol + CurrencyLayerClient.ENDPOINT_TIMEFRAME)
+      .param("access_key", apiKey)
+      .param("start_date", CurrencyLayerClient.DATE_FORMATTER.format(startDate))
+      .param("end_date", CurrencyLayerClient.DATE_FORMATTER.format(endDate))
+    if (source.nonEmpty)
+      request.param("source", source)
+    if (currencies.nonEmpty)
+      request.param("currencies", currencies.mkString(","))
+    if (!prettyJson) {
+      request.param("format", "0")
+    }
+    val json = request.asString.body
+    Response.parse(json).ratesOverInterval()
+  }
 }

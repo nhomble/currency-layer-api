@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import org.hombro.currencylayer.api.client.SynchronousClient
-import org.hombro.currencylayer.api.response.json.model.{CurrencyList, HistoricQuoteQuery, LiveQuoteQuery}
+import org.hombro.currencylayer.api.response.json.model._
 
 import scala.util.Try
 
@@ -36,7 +36,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def liveRate(currencies: List[String] = List(), prettyJson: Boolean = true): Try[LiveQuoteQuery]
+  def liveRate(currencies: List[String] = List(), prettyJson: Boolean = true): Try[LiveRates]
 
   /**
     * "historical" endpoint - request historical rates for a specific day
@@ -46,7 +46,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def historicalRate(date: Date, currencies: List[String] = List(), prettyJson: Boolean = true): Try[HistoricQuoteQuery]
+  def historicalRate(date: Date, currencies: List[String] = List(), prettyJson: Boolean = true): Try[HistoricRates]
 
   /**
     * "convert" endpoint - convert any amount from one currency to another
@@ -58,7 +58,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def liveConversion(fromCurrency: String, toCurrency: String, amount: Int, prettyJson: Boolean = true)
+  def liveConversion(fromCurrency: String, toCurrency: String, amount: Int, prettyJson: Boolean = true): Try[LiveConvert]
 
   /**
     * identical to liveConversion(), the optional historical date parameter was pulled out and given a separate method
@@ -71,7 +71,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def historicalConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean = true)
+  def historicalConversion(fromCurrency: String, toCurrency: String, amount: Int, date: Date, prettyJson: Boolean = true): Try[HistoricConvert]
 
   /**
     * "timeframe" endpoint - request exchange rates for a specific period of time
@@ -83,7 +83,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def ratesOverInterval(startDate: Date, endDate: Date, source: String, currencies: List[String] = List(), prettyJson: Boolean = true)
+  def ratesOverInterval(startDate: Date, endDate: Date, source: String, currencies: List[String] = List(), prettyJson: Boolean = true): Try[RatesOverTimeQuery]
 
   /**
     * "change" endpoint - request any currency's change parameters (margin
@@ -94,7 +94,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def change(source: String, currencies: List[String] = List(), prettyJson: Boolean = true)
+  def change(source: String, currencies: List[String] = List(), prettyJson: Boolean = true): Try[List[CurrencyChange]]
 
   /**
     * "change" endpoint - request any currency's change parameters (margin
@@ -108,7 +108,7 @@ abstract class CurrencyLayerClient(val apiKey: String) {
     * @param prettyJson - format the output so that it is human readable
     * @return
     */
-  def changeOverInterval(source: String, currencies: List[String] = List(), startDate: Date, endDate: Date, prettyJson: Boolean = true)
+  def changeOverInterval(source: String, currencies: List[String] = List(), startDate: Date, endDate: Date, prettyJson: Boolean = true): Try[List[CurrencyChange]]
 
   /**
     * Return all supported currencies
